@@ -1,0 +1,32 @@
+#!/bin/bash
+
+if [[ -z $1 ]] ; then
+	echo "usage: $0 [<user=root> [<hostname> ...]]"
+	exit 1
+fi
+
+inventory=/etc/ansible/hosts
+if [[ -n $2 ]] ; then
+	inventory=$(mktemp)
+	echo "bootstrap" > $inventory
+	for i in ${@:2}; do
+		echo "$i" >> $inventory
+	done
+fi
+
+playbook=$(mktemp --suffix=.yml)
+cat <<-EOF > $playbook
+	---
+	- gather_facts: no
+	  hosts: bootstrap
+	  roles:
+	  - role: bootstrap
+	    validate_certs: False
+EOF
+
+user=${1:root}
+ansible-playbook --ask-become --ask-pass --become --inventory-file=$inventory --ssh-common-args="-o ControlPersist=no" --user=$user $playbook -vv
+
+[[ -n $2 ]] && rm --force $inventory
+rm --force $playbook
+

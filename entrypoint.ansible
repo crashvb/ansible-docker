@@ -1,0 +1,42 @@
+#!/bin/bash
+
+set -e
+
+function generate_sshkey
+{
+
+	# Note: ssh-keygen -f id_rsa -y > id_rsa.pub
+	key=id_rsa.${1,,}
+	secrets=$EP_SECRETS_ROOT/$key
+	userkey=$(eval echo ~${1,,})/.ssh/id_rsa
+
+	if [[ ! -d $EP_SECRETS_ROOT ]] ; then
+		log "WARN: Creating secrets root: $EP_SECRETS_ROOT ..."
+		mkdir --parents $EP_SECRETS_ROOT
+	fi
+
+	mkdir --parents $(basename $userkey)
+
+	if [[ -e $secrets ]] ; then
+		log "Importing $key from secrets ..."
+		ln --force --symbolic $secrets $userkey
+	elif [[ ! -e $userkey  ]] ; then
+		log "Generating $key in secrets ..."
+		ssh-keygen -f $secrets -t rsa -N ''
+		ln --symbolic $secrets $userkey
+	else
+		log "Importing $key from container ..."
+		install --mode=0400 $userkey $secrets
+		ln --force --symbolic $secrets $userkey
+	fi
+}
+export -f generate_sshkey
+
+# Configure: ansible
+if [[ ! -e $EP_RUN ]] ; then
+	log "Configuring $(basename $0) for first run ..."
+
+	# Generate ssh keys
+	generate_sshkey ansible
+fi
+

@@ -1,0 +1,32 @@
+#!/bin/bash
+
+if [[ -z $2 ]] ; then
+	echo "usage: $0 <host> <role> [<args> ...]" >&2
+	echo "ex: $0 myhost myrole -vv --extra-vars 'var1=val1'" >&2
+	exit 1
+fi
+
+host=$1
+shift
+role=$1
+shift
+
+# Note: Doesn't gather facts
+#ansible $hosts -m include_role -a "name=$role"
+
+inventory=$(mktemp)
+cat <<-EOF > $inventory
+	[ansiblerole]
+	$host
+EOF
+
+export ANSIBLE_RETRY_FILES_ENABLED=false
+ansible-playbook --inventory-file=$inventory --ssh-common-args="-o ControlPersist=no" "$@" /dev/stdin <<-EOF
+	---
+	- hosts: $hosts
+	  roles:
+	  - $role
+EOF
+
+rm --force $inventory
+
