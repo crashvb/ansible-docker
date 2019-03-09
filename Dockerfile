@@ -2,7 +2,7 @@ FROM crashvb/base:ubuntu
 LABEL maintainer="Richard Davis <crashvb@gmail.com>"
 
 # Install packages, download files ...
-RUN docker-apt ansible git-core openssh-client
+RUN docker-apt ansible git-core openssh-client sshpass
 
 # Configure: ansible
 ADD ansible* /usr/local/bin/
