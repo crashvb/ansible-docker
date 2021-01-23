@@ -1,32 +1,30 @@
 #!/bin/bash
 
-if [[ -z $2 ]] ; then
-	echo "usage: $0 <host> <role> [<args> ...]" >&2
-	echo "ex: $0 myhost myrole -vv --extra-vars 'var1=val1'" >&2
+if [[ -z ${2} ]] ; then
+	echo "usage: ${0} <host> <role> [<args> ...]" >&2
+	echo "ex: ${0} myhost myrole -vv --extra-vars 'var1=val1'" >&2
 	exit 1
 fi
 
-host=$1
-shift
-role=$1
-shift
+host=$(echo "${1}" | tr "," "\n")
+role=$(echo "${2}" | sed --expression=$'s/,/\\n	  - /g')
 
 # Note: Doesn't gather facts
 #ansible $hosts -m include_role -a "name=$role"
 
-inventory=$(mktemp)
-cat <<-EOF > $inventory
+inventory=$(mktemp --suffix=.yml)
+cat <<- EOF > "${inventory}"
 	[ansiblerole]
-	$host
+	${host}
 EOF
 
 export ANSIBLE_RETRY_FILES_ENABLED=false
-ansible-playbook --inventory-file=$inventory --ssh-common-args="-o ControlPersist=no" "$@" /dev/stdin <<-EOF
+ansible-playbook --inventory-file="${inventory}" --ssh-common-args="-o ControlPersist=no" "$@" /dev/stdin <<-EOF
 	---
-	- hosts: $hosts
+	- hosts: ansiblerole
 	  roles:
-	  - $role
+	  - ${role}
 EOF
 
-rm --force $inventory
+[[ -z ${ANSIBLE_DEBUG} ]] && rm --force "${inventory}"
 

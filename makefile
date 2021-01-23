@@ -8,14 +8,16 @@ include makefile.config
 default: build
 
 build:
-	docker build --force-rm=true --tag=$(registry)/$(image):$(tag) $(ARGS) .
+	docker build --force-rm=true --tag=$(registry)$(namespace)/$(image):$(tag) $(buildargs) $(ARGS) .
 
 debug:
 	docker run \
+		--hostname=$(name) \
+		--interactive=true \
 		--name=$(name) \
 		--tty=true \
 		$(runargs) \
-		$(registry)/$(image):$(tag) \
+		$(registry)$(namespace)/$(image):$(tag) \
 		$(ARGS)
 
 logs:
@@ -27,10 +29,11 @@ remove:
 run:
 	docker run \
 		--detach=true \
+		--hostname=$(name) \
 		--name=$(name) \
 		--tty=true \
 		$(runargs) \
-		$(registry)/$(image):$(tag) \
+		$(registry)$(namespace)/$(image):$(tag) \
 		$(ARGS)
 
 shell:

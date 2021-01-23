@@ -1,32 +1,30 @@
 #!/bin/bash
 
-if [[ -z $1 ]] ; then
-	echo "usage: $0 [<user=root> [<hostname> ...]]"
+if [[ -z ${1} ]] ; then
+	echo "usage: ${0} <user> <hostname> [ <args> ... ]"
+	echo "ex: ${0} alice server1 -vv --extra-vars validate_certs=False"
 	exit 1
 fi
 
-inventory=/etc/ansible/hosts
-if [[ -n $2 ]] ; then
-	inventory=$(mktemp)
-	echo "bootstrap" > $inventory
-	for i in ${@:2}; do
-		echo "$i" >> $inventory
-	done
-fi
+user="${1}"
+host="${2}"
+role=${ANSIBLE_BOOTSTRAP_ROLE:-bootstrap}
 
-playbook=$(mktemp --suffix=.yml)
-cat <<-EOF > $playbook
+inventory=$(mktemp --suffix=.yml)
+cat <<- EOF > "${inventory}"
+	[bootstrap]
+	${host}
+EOF
+
+export ANSIBLE_RETRY_FILES_ENABLED=false
+ansible-playbook --ask-become --ask-pass --become --inventory-file=$inventory --ssh-common-args="-o ControlPersist=no" --user=$user "$@" /dev/stdin <<-EOF
 	---
 	- gather_facts: no
 	  hosts: bootstrap
 	  roles:
-	  - role: bootstrap
+	  - role: ${role}
 	    validate_certs: False
 EOF
 
-user=${1:root}
-ansible-playbook --ask-become --ask-pass --become --inventory-file=$inventory --ssh-common-args="-o ControlPersist=no" --user=$user $playbook -vv
-
-[[ -n $2 ]] && rm --force $inventory
-rm --force $playbook
+[[ -z ${ANSIBLE_DEBUG} ]] && rm --force "${inventory}"
 

@@ -1,4 +1,4 @@
-FROM crashvb/base:ubuntu
+FROM crashvb/base:20.04-202007030444
 LABEL maintainer="Richard Davis <crashvb@gmail.com>"
 
 # Install packages, download files ...
