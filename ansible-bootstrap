@@ -8,12 +8,16 @@ fi
 
 user="${1}"
 host="${2}"
+shift 2
 role=${ANSIBLE_BOOTSTRAP_ROLE:-bootstrap}
 
 inventory=$(mktemp --suffix=.yml)
 cat <<- EOF > "${inventory}"
 	[bootstrap]
 	${host}
+
+	[bootstrap:vars]
+	ansible_python_interpreter=/usr/bin/python3
 EOF
 
 export ANSIBLE_RETRY_FILES_ENABLED=false

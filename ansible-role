@@ -8,6 +8,7 @@ fi
 
 host=$(echo "${1}" | tr "," "\n")
 role=$(echo "${2}" | sed --expression=$'s/,/\\n	  - /g')
+shift 2
 
 # Note: Doesn't gather facts
 #ansible $hosts -m include_role -a "name=$role"
@@ -16,6 +17,9 @@ inventory=$(mktemp --suffix=.yml)
 cat <<- EOF > "${inventory}"
 	[ansiblerole]
 	${host}
+
+	[ansiblerole:vars]
+	ansible_python_interpreter=/usr/bin/python3
 EOF
 
 export ANSIBLE_RETRY_FILES_ENABLED=false
