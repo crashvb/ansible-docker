@@ -1,4 +1,4 @@
-FROM crashvb/base:20.04-202201080422@sha256:57745c66439ee82fda88c422b4753a736c1f59d64d2eaf908e9a4ea1999225ab
+FROM crashvb/base:20.04-202201080422@sha256:57745c66439ee82fda88c422b4753a736c1f59d64d2eaf908e9a4ea1999225ab as builder
 ARG python_version=3.8.3
 RUN docker-apt \
 	build-essential \
@@ -20,7 +20,7 @@ RUN docker-apt \
 	xz-utils \
 	zlib1g-dev && \
 	git clone https://github.com/pyenv/pyenv.git "/opt/pyenv"
-RUN PYENV_ROOT="/opt/pyenv" PATH="${PYENV_ROOT}/bin:${PYENV_ROOT}/shims:${PATH}" pyenv install ${python_version}
+RUN PYENV_ROOT="/opt/pyenv" PATH="/opt/pyenv/bin:/opt/pyenv/shims:${PATH}" pyenv install ${python_version}
 
 
 FROM crashvb/base:20.04-202201080422@sha256:57745c66439ee82fda88c422b4753a736c1f59d64d2eaf908e9a4ea1999225ab
@@ -45,21 +45,22 @@ ENV \
 	LC_ALL=C.UTF-8 \
 	PYENV_ROOT="/opt/pyenv" \
 	PATH="/opt/pyenv/versions/${python_version}/bin:/opt/pyenv/bin:/opt/pyenv/shims:${PATH}"
-COPY --from=0 /opt/pyenv /opt/pyenv
+COPY --from=builder /opt/pyenv /opt/pyenv
 RUN echo "#!/bin/bash" >> /etc/profile.d/pyenv.sh && \
 	echo "export PYENV_ROOT=\"/opt/pyenv\"" >> /etc/profile.d/pyenv.sh && \
 	echo "export PATH=\"\${PYENV_ROOT}/versions/${python_version}/bin:\${PYENV_ROOT}/bin:\${PYENV_ROOT}/shims:\${PATH}\"" >> /etc/profile.d/pyenv.sh
+# hadolint ignore=DL3013
 RUN docker-apt git-core openssh-client sshpass && \
 	pyenv global ${python_version} && \
-	python -m pip install --upgrade pip wheel && \
-	python -m pip install ansible
+	python -m pip install --no-cache-dir --upgrade pip wheel && \
+	python -m pip install --no-cache-dir ansible
 
 # Configure: ansible
-ADD ansible* /usr/local/bin/
+COPY ansible* /usr/local/bin/
 RUN useradd --create-home ansible && \
 	mkdir --parents /home/ansible/.ssh && \
 	install --directory --group=root --mode=0755 --owner=root /etc/ansible/hosts && \
-	echo "[localhost]\nlocalhost" > /etc/ansible/hosts/hosts.localhost
+	printf "[localhost]\nlocalhost\n" > /etc/ansible/hosts/hosts.localhost
 
 # Configure: entrypoint
-ADD entrypoint.ansible /etc/entrypoint.d/ansible
+COPY entrypoint.ansible /etc/entrypoint.d/ansible
