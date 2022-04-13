@@ -1,30 +1,31 @@
 #!/bin/bash
 
-if [[ -z ${1} ]] ; then
-	echo "usage: ${0} <user> <hostname> [ <args> ... ]"
-	echo "ex: ${0} alice server1 -vv --extra-vars validate_certs=False"
+if [[ -z ${2} ]] ; then
+	echo "usage: ${0} <user> <hostname> [ <args> ... ]" >&2
+	echo "ex: ${0} alice server1 -vv --extra-vars validate_certs=False" >&2
 	exit 1
 fi
 
 user="${1}"
 host="${2}"
 shift 2
+
 role=${ANSIBLE_BOOTSTRAP_ROLE:-bootstrap}
 
 inventory=$(mktemp --suffix=.yml)
 cat <<- EOF > "${inventory}"
-	[bootstrap]
+	[section]
 	${host}
 
-	[bootstrap:vars]
+	[section:vars]
 	ansible_python_interpreter=/usr/bin/python3
 EOF
 
 export ANSIBLE_RETRY_FILES_ENABLED=false
-ansible-playbook --ask-become --ask-pass --become --inventory-file=$inventory --ssh-common-args="-o ControlPersist=no" --user=$user "$@" /dev/stdin <<-EOF
+ansible-playbook --ask-become --ask-pass --become --inventory-file="${inventory}" --ssh-common-args="-o ControlPersist=no" --user="${user}" "$@" /dev/stdin <<-EOF
 	---
 	- gather_facts: no
-	  hosts: bootstrap
+	  hosts: section
 	  roles:
 	  - role: ${role}
 	    validate_certs: False

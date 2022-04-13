@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ -z ${2} ]] ; then
-	echo "usage: ${0} <host> <role> [<args> ...]" >&2
+	echo "usage: ${0} <hostname> <role> [<args> ...]" >&2
 	echo "ex: ${0} myhost myrole -vv --extra-vars 'var1=val1'" >&2
 	exit 1
 fi
@@ -15,19 +15,19 @@ shift 2
 
 inventory=$(mktemp --suffix=.yml)
 cat <<- EOF > "${inventory}"
-	[ansiblerole]
+	[section]
 	${host}
 
-	[ansiblerole:vars]
+	[section:vars]
 	ansible_python_interpreter=/usr/bin/python3
 EOF
 
 export ANSIBLE_RETRY_FILES_ENABLED=false
 ansible-playbook --inventory-file="${inventory}" --ssh-common-args="-o ControlPersist=no" "$@" /dev/stdin <<-EOF
 	---
-	- hosts: ansiblerole
+	- hosts: section
 	  roles:
-	  - ${role}
+	  - role: ${role}
 EOF
 
 [[ -z ${ANSIBLE_DEBUG} ]] && rm --force "${inventory}"
