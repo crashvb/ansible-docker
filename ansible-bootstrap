@@ -1,6 +1,8 @@
 #!/bin/bash
 
-if [[ -z ${2} ]] ; then
+set -e -o pipefail
+
+if [[ -z "${2}" ]] ; then
 	echo "usage: ${0} <user> <hostname> [ <args> ... ]" >&2
 	echo "ex: ${0} alice server1 -vv --extra-vars validate_certs=False" >&2
 	exit 1
@@ -10,9 +12,9 @@ user="${1}"
 host="${2}"
 shift 2
 
-role=${ANSIBLE_BOOTSTRAP_ROLE:-bootstrap}
+role="${ANSIBLE_BOOTSTRAP_ROLE:-bootstrap}"
 
-inventory=$(mktemp --suffix=.yml)
+inventory="$(mktemp --suffix=.yml)"
 cat <<- EOF > "${inventory}"
 	[section]
 	${host}
@@ -31,5 +33,5 @@ ansible-playbook --ask-become --ask-pass --become --inventory-file="${inventory}
 	    validate_certs: False
 EOF
 
-[[ -z ${ANSIBLE_DEBUG} ]] && rm --force "${inventory}"
+[[ -z "${ANSIBLE_DEBUG}" ]] && rm --force "${inventory}"
 

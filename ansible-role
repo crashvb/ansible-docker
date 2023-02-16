@@ -1,6 +1,8 @@
 #!/bin/bash
 
-if [[ -z ${2} ]] ; then
+set -e -o pipefail
+
+if [[ -z "${2}" ]] ; then
 	echo "usage: ${0} <hostname> <role> [<args> ...]" >&2
 	echo "ex: ${0} myhost myrole -vv --extra-vars 'var1=val1'" >&2
 	exit 1
@@ -13,7 +15,7 @@ shift 2
 # Note: Doesn't gather facts
 #ansible $hosts -m include_role -a "name=$role"
 
-inventory=$(mktemp --suffix=.yml)
+inventory="$(mktemp --suffix=.yml)"
 cat <<- EOF > "${inventory}"
 	[section]
 	${host}
@@ -30,5 +32,5 @@ ansible-playbook --inventory-file="${inventory}" --ssh-common-args="-o ControlPe
 	  - role: ${role}
 EOF
 
-[[ -z ${ANSIBLE_DEBUG} ]] && rm --force "${inventory}"
+[[ -z "${ANSIBLE_DEBUG}" ]] && rm --force "${inventory}"
 

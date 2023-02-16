@@ -1,17 +1,17 @@
 #!/bin/bash
 
-set -e
+set -e -o pipefail
 
 # Configure: ansible
-if [[ ! -e ${EP_RUN} ]] ; then
-	log "Configuring $(basename ${0}) for first run ..."
+if [[ ! -e "${EP_RUN}" ]] ; then
+	log "Configuring $(basename "${0}") for first run ..."
 
 	# Generate ssh keys
 	generate_sshkey ansible
 
-	if [[ -n ${ANSIBLE_ROLES} ]] ; then
+	if [[ -n "${ANSIBLE_ROLES}" ]] ; then
 		log "Retrieving ansible roles ..."
-		ansible-galaxy ${ANSIBLE_ROLES}
+		ansible-galaxy "${ANSIBLE_ROLES}"
 	fi
 fi
 

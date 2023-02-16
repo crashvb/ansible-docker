@@ -1,6 +1,8 @@
 #!/bin/bash
 
-ansible_remote_user=${ANSIBLE_REMOTE_USER:-ansible}
+set -e -o pipefail
+
+ansible_remote_user="${ANSIBLE_REMOTE_USER:-ansible}"
 command="ssh \
 	-l ${ansible_remote_user} \
 	-o PreferredAuthentications=publickey \
@@ -11,7 +13,7 @@ command="ssh \
 	$@"
 
 if [[ "X${EUID}" = "X$(id --user ansible)" ]] ; then
-	eval ${command}
+	eval "${command}"
 elif [[ "X${EUID}" = "X$(id --user root)" ]] ; then
 	su - ansible -c "${command}"
 else
