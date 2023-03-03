@@ -1,4 +1,4 @@
-FROM crashvb/base:22.04-202302172016@sha256:aa45348250be126f4b4e3d4f3de6d8314159426d517fb1e0a7ecdf32905fdf26 as builder
+FROM crashvb/base:22.04-202303031605@sha256:ffa63321cadb7fdc937508b2976c6f919576bcbe93122a27fded24343d818315 AS builder
 ARG python_version=3.8.3
 RUN docker-apt \
 	build-essential \
@@ -23,14 +23,14 @@ RUN docker-apt \
 RUN PYENV_ROOT="/opt/pyenv" PATH="/opt/pyenv/bin:/opt/pyenv/shims:${PATH}" pyenv install ${python_version}
 
 
-FROM crashvb/base:22.04-202302172016@sha256:aa45348250be126f4b4e3d4f3de6d8314159426d517fb1e0a7ecdf32905fdf26
+FROM crashvb/base:22.04-202303031605@sha256:ffa63321cadb7fdc937508b2976c6f919576bcbe93122a27fded24343d818315
 ARG org_opencontainers_image_created=undefined
 ARG org_opencontainers_image_revision=undefined
 ARG python_version=3.8.3
 LABEL \
 	org.opencontainers.image.authors="Richard Davis <crashvb@gmail.com>" \
-	org.opencontainers.image.base.digest="sha256:aa45348250be126f4b4e3d4f3de6d8314159426d517fb1e0a7ecdf32905fdf26" \
-	org.opencontainers.image.base.name="crashvb/base:22.04-202302172016" \
+	org.opencontainers.image.base.digest="sha256:ffa63321cadb7fdc937508b2976c6f919576bcbe93122a27fded24343d818315" \
+	org.opencontainers.image.base.name="crashvb/base:22.04-202303031605" \
 	org.opencontainers.image.created="${org_opencontainers_image_created}" \
 	org.opencontainers.image.description="Image containing ansible." \
 	org.opencontainers.image.licenses="Apache-2.0" \

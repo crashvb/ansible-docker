@@ -33,7 +33,8 @@ The embedded entrypoint script is located at `/etc/entrypoint.d/ansible` and per
 │  └─ ansible/
 └─ run/
    └─ secrets/
-      └─ id_rsa.ansible
+      ├─ id_rsa.ansible
+      └─ id_rsa.ansible.pub
 ```
 
 ### Exposed Ports

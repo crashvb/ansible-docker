@@ -12,9 +12,9 @@ command="ssh \
 	-o UserKnownHostsFile=/dev/null \
 	$@"
 
-if [[ "X${EUID}" = "X$(id --user ansible)" ]] ; then
+if [[ "X${EUID}" == "X$(id --user ansible)" ]] ; then
 	eval "${command}"
-elif [[ "X${EUID}" = "X$(id --user root)" ]] ; then
+elif [[ "X${EUID}" == "X$(id --user root)" ]] ; then
 	su - ansible -c "${command}"
 else
 	echo "This command only supports being executed as \"ansible\" or \"root\"!" 1>&2
