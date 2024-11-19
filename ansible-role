@@ -25,7 +25,12 @@ cat <<- EOF > "${inventory}"
 EOF
 
 export ANSIBLE_RETRY_FILES_ENABLED=false
-ansible-playbook --inventory-file="${inventory}" --ssh-common-args="-o ControlPersist=no" "$@" /dev/stdin <<-EOF
+ansible-playbook \
+	--ask-become \
+	--inventory-file="${inventory}" \
+	--ssh-common-args="-o ControlPersist=no" \
+	"$@" \
+	/dev/stdin <<-EOF
 	---
 	- hosts: section
 	  roles:

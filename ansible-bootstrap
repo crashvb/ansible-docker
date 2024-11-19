@@ -24,7 +24,15 @@ cat <<- EOF > "${inventory}"
 EOF
 
 export ANSIBLE_RETRY_FILES_ENABLED=false
-ansible-playbook --ask-become --ask-pass --become --inventory-file="${inventory}" --ssh-common-args="-o ControlPersist=no" --user="${user}" "$@" /dev/stdin <<-EOF
+ansible-playbook \
+	--ask-become \
+	--ask-pass \
+	--become \
+	--inventory-file="${inventory}" \
+	--ssh-common-args="-o ControlPersist=no" \
+	--user="${user}" \
+	"$@" \
+	/dev/stdin <<-EOF
 	---
 	- gather_facts: no
 	  hosts: section

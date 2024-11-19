@@ -7,11 +7,34 @@ if [[ ! -e "${EP_RUN}" ]] ; then
 	log "Configuring $(basename "${0}") for first run ..."
 
 	# Generate ssh keys
-	generate_sshkey ansible
+	[[ -z "${SSH_AUTH_SOCK}" ]] && \
+		generate_sshkey ansible || \
+		log "Skipping SSH key generation ..."
+
+	[[ -d "${ANSIBLE_ROLES_PATH:=/etc/ansible/roles}" ]] || mkdir --parents "${ANSIBLE_ROLES_PATH}"
 
 	if [[ -n "${ANSIBLE_ROLES}" ]] ; then
-		log "Retrieving ansible roles ..."
-		ansible-galaxy "${ANSIBLE_ROLES}"
+		log "Retrieving ansible roles: ansible-galaxy ..."
+		ansible-galaxy \
+			role \
+			install \
+			--roles-path="${ANSIBLE_ROLES_PATH}" \
+			"${ANSIBLE_ROLES}"
+	fi
+
+	if [[ -n "${ANSIBLE_LOCAL_ROLES}" ]] ; then
+		log "Retrieving local ansible roles ..."
+		mapfile -t roles <<< "$(echo "${ANSIBLE_LOCAL_ROLES}" | tr "," "\n")"
+		for role in ${roles[@]} ; do
+			ln --symbolic --verbose "${role}" "${ANSIBLE_ROLES_PATH}"
+		done
+	fi
+
+	if [[ -n "${ANSIBLE_LOCAL_ROLES_DIR}" ]] ; then
+		log "Deploying local ansible roles [dir] ..."
+		for role in "${ANSIBLE_LOCAL_ROLES_DIR}"/*/ ; do
+			ln --symbolic --verbose "${role}" "${ANSIBLE_ROLES_PATH}"
+		done
 	fi
 fi
 

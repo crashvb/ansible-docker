@@ -56,10 +56,14 @@ RUN docker-apt git-core openssh-client sshpass && \
 	python -m pip install --no-cache-dir ansible
 
 # Configure: ansible
+ENV ANISBLE_ROLES_PATH=/etc/ansible/roles
 COPY ansible* /usr/local/bin/
-RUN useradd --create-home ansible && \
-	mkdir --parents /home/ansible/.ssh && \
-	install --directory --group=root --mode=0755 --owner=root /etc/ansible/hosts && \
+RUN useradd --create-home ansible --shell=/bin/bash && \
+	install --group=ansible --mode=0644 --owner=ansible /dev/null /home/ansible/.bashrc && \
+	sed --expression='s/31m/34m/g' /root/.bashrc > /home/ansible/.bashrc && \
+	echo "source /etc/profile.d/pyenv.sh" >> /home/ansible/.bashrc && \
+	install --directory --group=ansible --mode=0755 --owner=ansible /home/ansible/.ssh && \
+	install --directory --group=root --mode=0755 --owner=root /etc/ansible/hosts /etc/ansible/roles && \
 	printf "[localhost]\nlocalhost\n" > /etc/ansible/hosts/hosts.localhost
 
 # Configure: entrypoint
