@@ -50,10 +50,10 @@ RUN echo "#!/bin/bash" >> /etc/profile.d/pyenv.sh && \
 	echo "export PYENV_ROOT=\"/opt/pyenv\"" >> /etc/profile.d/pyenv.sh && \
 	echo "export PATH=\"\${PYENV_ROOT}/versions/${python_version}/bin:\${PYENV_ROOT}/bin:\${PYENV_ROOT}/shims:\${PATH}\"" >> /etc/profile.d/pyenv.sh
 # hadolint ignore=DL3013
-RUN docker-apt git-core openssh-client sshpass && \
+RUN docker-apt git-core jq openssh-client sshpass && \
 	pyenv global ${python_version} && \
 	python -m pip install --no-cache-dir --upgrade pip wheel && \
-	python -m pip install --no-cache-dir ansible
+	python -m pip install --no-cache-dir ansible yq
 
 # Configure: ansible
 ENV ANISBLE_ROLES_PATH=/etc/ansible/roles

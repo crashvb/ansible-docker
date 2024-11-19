@@ -2,6 +2,16 @@
 
 set -e -o pipefail
 
+function link_role
+{
+	local role="${1}"
+	local meta="${role}/meta/main.yml"
+	[[ -e "${meta}" ]] && \
+		name="$(cat "${meta}" | yq --raw-output '.galaxy_info.role_name')" || \
+		name="$(basename "${role}")"
+	ln --symbolic --verbose "${role}" "${ANSIBLE_ROLES_PATH}/${name}"
+}
+
 # Configure: ansible
 if [[ ! -e "${EP_RUN}" ]] ; then
 	log "Configuring $(basename "${0}") for first run ..."
@@ -26,14 +36,14 @@ if [[ ! -e "${EP_RUN}" ]] ; then
 		log "Retrieving local ansible roles ..."
 		mapfile -t roles <<< "$(echo "${ANSIBLE_LOCAL_ROLES}" | tr "," "\n")"
 		for role in ${roles[@]} ; do
-			ln --symbolic --verbose "${role}" "${ANSIBLE_ROLES_PATH}"
+			link_role "${role}"
 		done
 	fi
 
 	if [[ -n "${ANSIBLE_LOCAL_ROLES_DIR}" ]] ; then
 		log "Deploying local ansible roles [dir] ..."
 		for role in "${ANSIBLE_LOCAL_ROLES_DIR}"/*/ ; do
-			ln --symbolic --verbose "${role}" "${ANSIBLE_ROLES_PATH}"
+			link_role "${role}"
 		done
 	fi
 fi
