@@ -15,6 +15,11 @@ shift 2
 role="${ANSIBLE_BOOTSTRAP_ROLE:-bootstrap}"
 
 inventory="$(mktemp --suffix=.yml)"
+function cleanup {
+	[[ -z "${ANSIBLE_DEBUG}" ]] && rm --force -- "${inventory}"
+}
+trap cleanup EXIT SIGINT
+
 cat <<- EOF > "${inventory}"
 	[section]
 	${host}
@@ -29,9 +34,8 @@ ansible-playbook \
 	--ask-pass \
 	--become \
 	--inventory-file="${inventory}" \
-	--ssh-common-args="-o ControlPersist=no" \
 	--user="${user}" \
-	"$@" \
+	"${@} \
 	/dev/stdin <<-EOF
 	---
 	- gather_facts: no
@@ -40,6 +44,4 @@ ansible-playbook \
 	  - role: ${role}
 	    validate_certs: False
 EOF
-
-[[ -z "${ANSIBLE_DEBUG}" ]] && rm --force "${inventory}"
 

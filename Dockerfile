@@ -56,7 +56,10 @@ RUN docker-apt git-core jq openssh-client sshpass && \
 	python -m pip install --no-cache-dir ansible yq
 
 # Configure: ansible
-ENV ANISBLE_ROLES_PATH=/etc/ansible/roles
+ENV \
+	ANISBLE_BECOME_FLAGS="--preserve-env=SSH_AUTH_SOCK" \
+	ANISBLE_ROLES_PATH=/etc/ansible/roles \
+	ANSIBLE_SSH_COMMON_ARGS="-o ControlPersist=no -o ForwardAgent=yes"
 COPY ansible* /usr/local/bin/
 RUN useradd --create-home ansible --shell=/bin/bash && \
 	install --group=ansible --mode=0644 --owner=ansible /dev/null /home/ansible/.bashrc && \

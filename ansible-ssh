@@ -2,20 +2,19 @@
 
 set -e -o pipefail
 
-ansible_remote_user="${ANSIBLE_REMOTE_USER:-ansible}"
 command="ssh \
-	-l ${ansible_remote_user} \
+	-l ${ANSIBLE_REMOTE_USER:-ansible} \
 	-o PreferredAuthentications=publickey \
 	-o PasswordAuthentication=no \
 	-o PubkeyAuthentication=yes \
 	-o StrictHostKeyChecking=no \
 	-o UserKnownHostsFile=/dev/null \
-	$@"
+	${@}"
 
 if [[ "X${EUID}" == "X$(id --user ansible)" ]] ; then
 	eval "${command}"
 elif [[ "X${EUID}" == "X$(id --user root)" ]] ; then
-	su - ansible -c "${command}"
+	su ansible -c "${command}"
 else
 	echo "This command only supports being executed as \"ansible\" or \"root\"!" 1>&2
 	exit 1

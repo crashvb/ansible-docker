@@ -3,17 +3,14 @@
 set -e -o pipefail
 
 if [[ -z "${2}" ]] ; then
-	echo "usage: ${0} <hostname> <role> [<args> ...]" >&2
-	echo "ex: ${0} myhost myrole -vv --extra-vars 'var1=val1'" >&2
+	echo "usage: ${0} <hostname> [<args> ...]" >&2
+	echo "ex: ${0} myhost -m ping -vv --extra-vars 'var1=val1'" >&2
+	echo "    ${0} myhost --ask-become --become -a 'ssh-add -l'" >&2
 	exit 1
 fi
 
 host=$(echo "${1}" | tr "," "\n")
-role=$(echo "${2}" | sed --expression=$'s/,/\\n	  - /g')
-shift 2
-
-# Note: Doesn't gather facts
-#ansible $hosts -m include_role -a "name=$role"
+shift
 
 inventory="$(mktemp --suffix=.yml)"
 function cleanup {
@@ -30,14 +27,8 @@ cat <<- EOF > "${inventory}"
 EOF
 
 export ANSIBLE_RETRY_FILES_ENABLED=false
-ansible-playbook \
-	--ask-become \
+ansible \
 	--inventory-file="${inventory}" \
-	"${@} \
-	/dev/stdin <<-EOF
-	---
-	- hosts: section
-	  roles:
-	  - role: ${role}
-EOF
+	section \
+	"${@}"
 

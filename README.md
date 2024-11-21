@@ -20,6 +20,7 @@ The embedded entrypoint script is located at `/etc/entrypoint.d/ansible` and per
 ## Helper Scripts
 
 * <tt>ansible-bootstrap</tt> - Assists with bootstrapping targets.
+* <tt>ansible-cmd</tt> - Assists with troubleshooting ansible modules.
 * <tt>ansible-role</tt> - Assists with applying one-off roles to targets.
 * <tt>ansible-ssh</tt> - Assists with troubleshooting SSH connectivity.
 
