@@ -7,7 +7,7 @@ function link_role
 	local role="${1}"
 	local meta="${role}/meta/main.yml"
 	[[ -e "${meta}" ]] && \
-		name="$(cat "${meta}" | yq --raw-output '.galaxy_info.role_name')" || \
+		name="$(yq --raw-output '.galaxy_info.role_name' < "${meta}")" || \
 		name="$(basename "${role}")"
 	ln --symbolic --verbose "${role}" "${ANSIBLE_ROLES_PATH}/${name}"
 }
@@ -35,7 +35,7 @@ if [[ ! -e "${EP_RUN}" ]] ; then
 	if [[ -n "${ANSIBLE_LOCAL_ROLES}" ]] ; then
 		log "Retrieving local ansible roles ..."
 		mapfile -t roles <<< "$(echo "${ANSIBLE_LOCAL_ROLES}" | tr "," "\n")"
-		for role in ${roles[@]} ; do
+		for role in "${roles[@]}" ; do
 			link_role "${role}"
 		done
 	fi

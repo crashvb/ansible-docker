@@ -35,7 +35,7 @@ ansible-playbook \
 	--become \
 	--inventory-file="${inventory}" \
 	--user="${user}" \
-	"${@} \
+	"${@}" \
 	/dev/stdin <<-EOF
 	---
 	- gather_facts: no

@@ -2,5 +2,5 @@
 
 set -e -o pipefail
 
-ansible all -m ping "${@}
+ansible all -m ping "${@}"
 

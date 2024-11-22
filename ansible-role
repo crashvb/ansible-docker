@@ -33,7 +33,7 @@ export ANSIBLE_RETRY_FILES_ENABLED=false
 ansible-playbook \
 	--ask-become \
 	--inventory-file="${inventory}" \
-	"${@} \
+	"${@}" \
 	/dev/stdin <<-EOF
 	---
 	- hosts: section
