@@ -16,8 +16,9 @@ shift 2
 #ansible $hosts -m include_role -a "name=$role"
 
 inventory="$(mktemp --suffix=.yml)"
+playbook="$(mktemp --suffix=.yml)"
 function cleanup {
-	[[ -z "${ANSIBLE_DEBUG}" ]] && rm --force -- "${inventory}"
+	[[ -z "${ANSIBLE_DEBUG}" ]] && rm --force -- "${inventory}" "${playbook}"
 }
 trap cleanup EXIT SIGINT
 
@@ -29,15 +30,17 @@ cat <<- EOF > "${inventory}"
 	ansible_python_interpreter=/usr/bin/python3
 EOF
 
-export ANSIBLE_RETRY_FILES_ENABLED=false
-ansible-playbook \
-	--ask-become \
-	--inventory-file="${inventory}" \
-	"${@}" \
-	/dev/stdin <<-EOF
+cat <<- EOF > "${playbook}"
 	---
 	- hosts: section
 	  roles:
 	  - role: ${role}
 EOF
+
+export ANSIBLE_RETRY_FILES_ENABLED=false
+ansible-playbook \
+	--ask-become \
+	--inventory-file="${inventory}" \
+	"${@}" \
+	"${playbook}"
 
