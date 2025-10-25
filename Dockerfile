@@ -1,5 +1,5 @@
 FROM crashvb/base:24.04-202508010159@sha256:f7b3a015c749980c2427241686134908e4f82e2c0b72688dac37cb59e4e05169 AS builder
-ARG python_version=3.8.3
+ARG python_version=3.12.3
 RUN docker-apt \
 	build-essential \
 	curl \
@@ -26,7 +26,7 @@ RUN PYENV_ROOT="/opt/pyenv" PATH="/opt/pyenv/bin:/opt/pyenv/shims:${PATH}" pyenv
 FROM crashvb/base:24.04-202508010159@sha256:f7b3a015c749980c2427241686134908e4f82e2c0b72688dac37cb59e4e05169
 ARG org_opencontainers_image_created=undefined
 ARG org_opencontainers_image_revision=undefined
-ARG python_version=3.8.3
+ARG python_version=3.12.3
 LABEL \
 	org.opencontainers.image.authors="Richard Davis <crashvb@gmail.com>" \
 	org.opencontainers.image.base.digest="sha256:f7b3a015c749980c2427241686134908e4f82e2c0b72688dac37cb59e4e05169" \
