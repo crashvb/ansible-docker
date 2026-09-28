@@ -1,5 +1,5 @@
-FROM crashvb/base:24.04-202508010159@sha256:f7b3a015c749980c2427241686134908e4f82e2c0b72688dac37cb59e4e05169 AS builder
-ARG python_version=3.12.3
+FROM crashvb/base:26.04-202609281702@sha256:dfc9cac1857271a0962cdf7416717a8b788c0b9001dddc77428f17420a966dcc AS builder
+ARG python_version=3.14.7
 RUN docker-apt \
 	build-essential \
 	curl \
@@ -23,14 +23,14 @@ RUN docker-apt \
 RUN PYENV_ROOT="/opt/pyenv" PATH="/opt/pyenv/bin:/opt/pyenv/shims:${PATH}" pyenv install ${python_version}
 
 
-FROM crashvb/base:24.04-202508010159@sha256:f7b3a015c749980c2427241686134908e4f82e2c0b72688dac37cb59e4e05169
+FROM crashvb/base:26.04-202609281702@sha256:dfc9cac1857271a0962cdf7416717a8b788c0b9001dddc77428f17420a966dcc
 ARG org_opencontainers_image_created=undefined
 ARG org_opencontainers_image_revision=undefined
-ARG python_version=3.12.3
+ARG python_version=3.14.7
 LABEL \
 	org.opencontainers.image.authors="Richard Davis <crashvb@gmail.com>" \
-	org.opencontainers.image.base.digest="sha256:f7b3a015c749980c2427241686134908e4f82e2c0b72688dac37cb59e4e05169" \
-	org.opencontainers.image.base.name="crashvb/base:24.04-202508010159" \
+	org.opencontainers.image.base.digest="sha256:dfc9cac1857271a0962cdf7416717a8b788c0b9001dddc77428f17420a966dcc" \
+	org.opencontainers.image.base.name="crashvb/base:26.04-202609281702" \
 	org.opencontainers.image.created="${org_opencontainers_image_created}" \
 	org.opencontainers.image.description="Image containing ansible." \
 	org.opencontainers.image.licenses="Apache-2.0" \
@@ -53,7 +53,10 @@ RUN echo "#!/bin/bash" >> /etc/profile.d/pyenv.sh && \
 RUN docker-apt git-core jq openssh-client sshpass && \
 	pyenv global ${python_version} && \
 	python -m pip install --no-cache-dir --upgrade pip wheel && \
-	python -m pip install --no-cache-dir ansible yq
+	python -m pip install --no-cache-dir \
+		ansible==15.0.0a1 \
+		https://github.com/ansible/ansible/archive/refs/tags/v2.22.0b1.tar.gz \
+		yq
 
 # Configure: ansible
 ENV \
